@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import { DebugMessageProcessor } from "./DebugMessageProcessor";
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -31,6 +32,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	panel.webview.html = getWebviewContent(cyStyle, cyMain, cyLayout, cyAvsdf, cyCytoscape, cyCytoscapeAvsdf);
 
+	const debugMessageProcessor: DebugMessageProcessor = new DebugMessageProcessor(panel);
+
 	// panel.onDidDispose(
     //     () => {
     //       // When the panel is closed, cancel any future updates to the webview content
@@ -60,48 +63,22 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	vscode.debug.onDidStartDebugSession(session => {
-		//console.log(session);
+		// console.log(session);
 	}),
 	vscode.debug.onDidTerminateDebugSession(session => {
-		//console.log(session);
+		// console.log(session);
+
+		debugMessageProcessor.clearDebugState();
 	}),
 	vscode.debug.registerDebugAdapterTrackerFactory("*", {
 		createDebugAdapterTracker: session => {
-			//console.log(session);
+			// console.log(session);
 			return {
 				onDidSendMessage: async msg => {
 					// console.log(msg);
 
-					if(msg.type === "response" && msg.command && msg.command === "variables"){
-						console.log(msg);
-					}
-
-					if (msg.type === "event") {
-						if (msg.event === "stopped") {
-							const threadId = msg.body.threadId;
-
-							const stackTraceResponse = (await session.customRequest("stackTrace", {
-								threadId: threadId,
-								levels: 1,
-								startFrame: 0,
-							}));
-
-							// console.log("Response stackframe:");
-							// console.log(stackTraceResponse);
-
-							const sourcePath = stackTraceResponse.stackFrames[0].source.path;
-							const sourceReference = stackTraceResponse.stackFrames[0].sourceReference;
-
-							// const sourceResponse = (await session.customRequest("source", {
-							//	sourceReference: 1,
-							// }));
-
-							// console.log("Response source:");
-							// console.log(sourceResponse);
-						}
-					}
-
-					//panel.webview.postMessage({ command: "addNode" });
+					debugMessageProcessor.identifyStackFrame(msg);
+					// debugMessageProcessor.identifyVariables(msg);
 				},
 			};
 		},
@@ -136,27 +113,6 @@ function getWebviewContent(cyStyle: vscode.Uri, cyMain: vscode.Uri, cyLayout: vs
 			<div id="cy"></div>
 
 			<script src="${cyMain}"></script>
-
-			<!--<h1 id="lines-of-code-counter">0</h1>-->
-			<script>
-				// (function() {
-				// 	const vscode = acquireVsCodeApi();
-				// 	const counter = document.getElementById('lines-of-code-counter');
-
-				// 	let count = 0;
-				// 	setInterval(() => {
-				// 		counter.textContent = count++;
-
-				// 		// Alert the extension when our cat introduces a bug
-				// 		if (Math.random() < 0.001 * count) {
-				// 			vscode.postMessage({
-				// 				command: 'alert',
-				// 				text: '🐛  on line ' + count
-				// 			})
-				// 		}
-				// 	}, 100);
-				// }())
-			</script>
 		</body>
 	</html>`;
 }

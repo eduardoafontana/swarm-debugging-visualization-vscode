@@ -49,17 +49,26 @@ document.addEventListener('DOMContentLoaded', function(){
 
 		const message = event.data;
 
-		switch (message.command) {
-			case 'addNode': addNode(); break;
+		if(message.node !== undefined) {
+			addNode(message.node);
+		}
+
+		if(message.clear !== undefined) {
+			clearGraph();
 		}
 	});
 	
+	function clearGraph(){
+		cy.edges().remove();
+		cy.elements().remove();
+	}
+
 	var countNodeId = 0;
 	
-	function addNode(){
+	function addNode(name){
 		cy.add({
 			group: 'nodes',
-			data: { id: countNodeId, name: 'Test', weight: 1}
+			data: { id: countNodeId, name: name, weight: 1}
 		});
 		
 		if(countNodeId > 0){
