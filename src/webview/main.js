@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				style: {
 					'label': 'data(name)',
 					'text-valign': 'center',
-					'color': '#000000',
+					'color': '#ffffff',
 					'background-color': '#3a7ecf',
 					'shape': "roundrectangle",
 					'padding': '6px'
@@ -46,11 +46,14 @@ document.addEventListener('DOMContentLoaded', function(){
 	});
 
 	window.addEventListener('message', event => {
-
 		const message = event.data;
 
 		if(message.node !== undefined) {
 			addNode(message.node);
+		}
+
+		if(message.edge !== undefined) {
+			addEdge(message.edge);
 		}
 
 		if(message.clear !== undefined) {
@@ -62,19 +65,17 @@ document.addEventListener('DOMContentLoaded', function(){
 		cy.edges().remove();
 		cy.elements().remove();
 	}
-
-	var countNodeId = 0;
 	
-	function addNode(name){
+	function addNode(node){
 		cy.add({
 			group: 'nodes',
-			data: { id: countNodeId, name: name, weight: 1}
+			data: { id: node.identifier, name: node.name, weight: 1 }
 		});
 		
-		if(countNodeId > 0){
+		if(node.parent !== null){
 			cy.add({
 				group: 'edges',
-				data: { source: (countNodeId - 1), name: 'EdgeT', target: countNodeId, directed: 'false'}
+				data: { source: node.parent.identifier, name: 'EdgeT', target: node.identifier, directed: 'false' }
 			});
 		}
 		
@@ -87,8 +88,23 @@ document.addEventListener('DOMContentLoaded', function(){
 		});
 
 		layout.run();
+	}
 
-		countNodeId++;
+	function addEdge(edge){	
+		cy.add({
+			group: 'edges',
+			data: { source: edge.source, name: 'EdgeT', target: edge.target, directed: 'false' }
+		});
+		
+		var layout = cy.layout({
+			name: 'avsdf',
+			animate: "end",
+			animationDuration: 700,
+			animationEasing: 'ease-in-out',
+			nodeSeparation: 120
+		});
+
+		layout.run();
 	}
 
 });

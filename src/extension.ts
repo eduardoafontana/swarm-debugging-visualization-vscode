@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
 					// console.log(msg);
 
 					debugMessageProcessor.identifyStackFrame(msg);
-					// debugMessageProcessor.identifyVariables(msg);
+					debugMessageProcessor.identifyVariables(msg, session);
 				},
 			};
 		},
