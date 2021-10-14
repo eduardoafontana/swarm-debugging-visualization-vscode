@@ -6,31 +6,19 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const panel = vscode.window.createWebviewPanel("swarmWebview", "Swarm Visualization", vscode.ViewColumn.Two, { enableScripts: true });
 
-    const cyStyle = panel.webview.asWebviewUri(vscode.Uri.file(
+    const scriptStyle = panel.webview.asWebviewUri(vscode.Uri.file(
 		path.join(context.extensionPath, "src", "webview", "style.css")
 	));
 
-    const cyMain = panel.webview.asWebviewUri(vscode.Uri.file(
+    const scriptMain = panel.webview.asWebviewUri(vscode.Uri.file(
 		path.join(context.extensionPath, "src", "webview", "main.js")
 	));
 
-    const cyLayout = panel.webview.asWebviewUri(vscode.Uri.file(
-		path.join(context.extensionPath, "src", "webview", "cytoscape", "layout-base.js")
+    const scriptForceGraph = panel.webview.asWebviewUri(vscode.Uri.file(
+		path.join(context.extensionPath, "src", "webview", "force-graph", "force-graph.min.js")
 	));
 
-    const cyAvsdf = panel.webview.asWebviewUri(vscode.Uri.file(
-		path.join(context.extensionPath, "src", "webview", "cytoscape", "avsdf-base.js")
-	));
-
-    const cyCytoscape = panel.webview.asWebviewUri(vscode.Uri.file(
-		path.join(context.extensionPath, "src", "webview", "cytoscape", "cytoscape.min.js")
-	));
-
-    const cyCytoscapeAvsdf = panel.webview.asWebviewUri(vscode.Uri.file(
-		path.join(context.extensionPath, "src", "webview", "cytoscape", "cytoscape-avsdf.js")
-	));
-
-	panel.webview.html = getWebviewContent(cyStyle, cyMain, cyLayout, cyAvsdf, cyCytoscape, cyCytoscapeAvsdf);
+	panel.webview.html = getWebviewContent(scriptStyle, scriptMain, scriptForceGraph);
 
 	const debugMessageProcessor: DebugMessageProcessor = new DebugMessageProcessor(panel);
 
@@ -87,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-function getWebviewContent(cyStyle: vscode.Uri, cyMain: vscode.Uri, cyLayout: vscode.Uri, cyAvsdf: vscode.Uri, cyCytoscape: vscode.Uri, cyCytoscapeAvsdf: vscode.Uri) {
+function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scriptForceGraph: vscode.Uri) {
 	return `<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -95,24 +83,54 @@ function getWebviewContent(cyStyle: vscode.Uri, cyMain: vscode.Uri, cyLayout: vs
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Swarm Visualization</title>
 
-			<link href="${cyStyle}" rel="stylesheet" />
+			<link href="${scriptStyle}" rel="stylesheet" />
 
-			<script src="${cyCytoscape}"></script>
-
-			<script src="${cyLayout}"></script>
-			<script src="${cyAvsdf}"></script>
-
-			<script src="${cyCytoscapeAvsdf}"></script>
+			<script src="${scriptForceGraph}"></script>
 		</head>
 		<body>
-			<h1>cytoscape-avsdf demo</h1>
-			<a data-toggle="tooltip" data-placement="auto" title="Add new node and auto reorganize">
-				<button id="addButton" type="button">Add Node</button>
+			<a data-toggle="tooltip" data-placement="auto" title="Add new method node and auto reorganize">
+				<button id="addMethodButton" type="button">Add Method</button>
 			</a>
 
-			<div id="cy"></div>
+			<a data-toggle="tooltip" data-placement="auto" title="Add new stackframe node and auto reorganize">
+				<button id="addStackFrameButton" type="button">Add Stackframe</button>
+			</a>
 
-			<script src="${cyMain}"></script>
+			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px;">
+				Node: 
+				<input type="radio" id="nodeSymbolRadio" name="nodePresentationMode" value="Symbol">
+				<label for="nodeSymbolRadio">Symbol</label>
+				<input type="radio" id="nodeTextRadio" name="nodePresentationMode" value="Text" checked="true">
+				<label for="nodeTextRadio">Text</label>
+			</div>
+
+			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+				Edge text: 
+				<input type="radio" id="edgeTextShowRadio" name="edgePresentationMode" value="Show" checked="true">
+				<label for="edgeTextShowRadio">Show</label>
+				<input type="radio" id="edgeTextHideRadio" name="edgePresentationMode" value="Hide">
+				<label for="edgeTextHideRadio">Hide</label>
+			</div>
+
+			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+				Show arrow: 
+				<input type="radio" id="edgeArrowShowRadio" name="edgeArrowMode" value="Show" checked="true">
+				<label for="edgeArrowShowRadio">Show</label>
+				<input type="radio" id="edgeArrowHideRadio" name="edgeArrowMode" value="Hide">
+				<label for="edgeArrowHideRadio">Hide</label>
+			</div>
+
+			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+				Show particles: 
+				<input type="radio" id="edgeParticleShowRadio" name="edgeParticleMode" value="Show">
+				<label for="edgeParticleShowRadio">Show</label>
+				<input type="radio" id="edgeParticleHideRadio" name="edgeParticleMode" value="Hide" checked="true">
+				<label for="edgeParticleHideRadio">Hide</label>
+			</div>
+
+			<div id="graph"></div>
+
+			<script src="${scriptMain}"></script>
 		</body>
 	</html>`;
 }

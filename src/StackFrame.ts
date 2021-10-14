@@ -2,6 +2,7 @@ import { StackFramePrevious } from "./StackFramePrevious";
 import { Variable } from "./Variable";
 
 export class StackFrame {
+    private _id: number;
     private _identifier: string;
     private _line: number;
     private _name: string;
@@ -10,7 +11,8 @@ export class StackFrame {
     private _previousStackFrame: StackFramePrevious;
     private _variables: Array<Variable>;
 
-    public constructor(identifier:string, line: number, name: string, sourceName: string, sourcePath: string) {
+    public constructor(id: number, identifier:string, line: number, name: string, sourceName: string, sourcePath: string) {
+        this._id = id;
         this._identifier = identifier;
         this._line = line;
         this._name = name;
@@ -18,6 +20,10 @@ export class StackFrame {
         this._sourcePath = sourcePath;
         this._previousStackFrame = new StackFramePrevious(0, "", "", "");
         this._variables = [];
+    }
+
+    public get id(): number {
+        return this._id;
     }
 
     public get identifier(): string {
