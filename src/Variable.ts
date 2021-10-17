@@ -2,13 +2,13 @@ import { StackFrame } from "./StackFrame";
 
 export class Variable {
     private _id: number;
-    private _identifier: string;
+    private _sequence: string;
     private _name: string;
     private _stackFrameLinked: StackFrame | null;
 
-    public constructor(id: number, identifier:string, name: string) {
+    public constructor(id: number, sequence:string, name: string) {
         this._id = id;
-        this._identifier = identifier;
+        this._sequence = sequence;
         this._name = name;
         this._stackFrameLinked = null;
     }
@@ -17,8 +17,8 @@ export class Variable {
         return this._id;
     }
 
-    public get identifier(): string {
-        return this._identifier;
+    public get sequence(): string {
+        return this._sequence;
     }
 
     public get name(): string {

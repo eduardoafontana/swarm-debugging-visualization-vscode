@@ -3,7 +3,7 @@ import { Variable } from "./Variable";
 
 export class StackFrame {
     private _id: number;
-    private _identifier: string;
+    private _sequence: string;
     private _line: number;
     private _name: string;
     private _sourceName: string;
@@ -11,9 +11,9 @@ export class StackFrame {
     private _previousStackFrame: StackFramePrevious;
     private _variables: Array<Variable>;
 
-    public constructor(id: number, identifier:string, line: number, name: string, sourceName: string, sourcePath: string) {
+    public constructor(id: number, sequence:string, line: number, name: string, sourceName: string, sourcePath: string) {
         this._id = id;
-        this._identifier = identifier;
+        this._sequence = sequence;
         this._line = line;
         this._name = name;
         this._sourceName = sourceName;
@@ -26,8 +26,8 @@ export class StackFrame {
         return this._id;
     }
 
-    public get identifier(): string {
-        return this._identifier;
+    public get sequence(): string {
+        return this._sequence;
     }
 
     public get line(): number {

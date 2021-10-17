@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// console.log(session);
 			return {
 				onDidSendMessage: async msg => {
-					// console.log(msg);
+					console.log(msg);
 
 					debugMessageProcessor.identifyStackFrame(msg);
 					debugMessageProcessor.identifyVariables(msg, session);
@@ -88,13 +88,6 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 			<script src="${scriptForceGraph}"></script>
 		</head>
 		<body>
-			<a data-toggle="tooltip" data-placement="auto" title="Add new method node and auto reorganize">
-				<button id="addMethodButton" type="button">Add Method</button>
-			</a>
-
-			<a data-toggle="tooltip" data-placement="auto" title="Add new stackframe node and auto reorganize">
-				<button id="addStackFrameButton" type="button">Add Stackframe</button>
-			</a>
 
 			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px;">
 				Node: 

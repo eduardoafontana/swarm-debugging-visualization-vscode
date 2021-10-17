@@ -34,7 +34,7 @@ export class DebugMessageProcessor {
 
         if(message.command !== "variables") { return; }
 
-        console.log(message);
+        // console.log(message);
 
         // todo: search for well structured object variables, on click get response or doing request
 
@@ -48,12 +48,12 @@ export class DebugMessageProcessor {
 
             if(variableExist === undefined) {
                 let id:number = this.idCounter;
-                let identifier:string = this.currentStackFrame.identifier + "." + (this.currentStackFrame.variables.length + 1).toString();
-                let variable: Variable = new Variable(id, identifier, element.name);
+                let sequence:string = this.currentStackFrame.sequence + "." + (this.currentStackFrame.variables.length + 1).toString();
+                let variable: Variable = new Variable(id, sequence, element.name);
 
                 let parentNode: any = {
                     id: this.currentStackFrame.id,
-                    identifier: this.currentStackFrame.identifier,
+                    sequence: this.currentStackFrame.sequence,
                     name: this.currentStackFrame.name,
                     parent: null,
                     type: "method" // todo review method
@@ -62,8 +62,9 @@ export class DebugMessageProcessor {
                 this.currentStackFrame.variables.push(variable);
                 this.webviewPanel.webview.postMessage({ node: {
                         id: variable.id,
-                        identifier: variable.identifier,
+                        sequence: variable.sequence,
                         name: variable.name,
+                        linkName: this.getLinkName(variable.name),
                         parent: parentNode,
                         type: "method" // todo review method
                     } }
@@ -128,13 +129,23 @@ export class DebugMessageProcessor {
             if(linkedVariable !== undefined) {
                 // todo: vincular a variável com esse stackFramesWaitingLink
                 this.webviewPanel.webview.postMessage(
-                    { edge: { source: linkedVariable.id, target: stackFrameWaitingLink.id } }
+                    { edge: {
+                        source: linkedVariable.id,
+                        target: stackFrameWaitingLink.id,
+                        sequence: linkedVariable.sequence,
+                        linkName: this.getLinkName(linkedVariable.name)
+                    } }
                 );
             } else {
                 // todo: vincular o current stackFrame com o stackFramesWaitingLink e fazer o post.
                 // para isso criar a variável _stackFrameLinked dentro do StackFrame
                 this.webviewPanel.webview.postMessage(
-                    { edge: { source: this.currentStackFrame?.id, target: stackFrameWaitingLink.id } }
+                    { edge: {
+                        source: this.currentStackFrame?.id,
+                        target: stackFrameWaitingLink.id,
+                        sequence: this.currentStackFrame?.sequence,
+                        linkName: this.getLinkName(this.currentStackFrame !== null ? this.currentStackFrame.name : "")
+                    } }
                 );
             }
 
@@ -164,7 +175,7 @@ export class DebugMessageProcessor {
 
         if(message.body.stackFrames.length !== message.body.totalFrames) { return; }
 
-        console.log(message);
+        // console.log(message);
 
         let frame: any | null = null;
         if(message.body.stackFrames.length > 0) {
@@ -227,8 +238,8 @@ export class DebugMessageProcessor {
 
     public createStackFrameAndPost(frame: any, framePrevious: any): void {
         let id: number = this.idCounter;
-        let identifier: string = (this.stackFrames.length + 1).toString();
-        let stackFrame: StackFrame = new StackFrame(id, identifier, frame.line, frame.name, frame.source.name, frame.source.path);
+        let sequence: string = (this.stackFrames.length + 1).toString();
+        let stackFrame: StackFrame = new StackFrame(id, sequence, frame.line, frame.name, frame.source.name, frame.source.path);
 
         if(framePrevious !== null) {
             stackFrame.previousStackFrame = new StackFramePrevious(
@@ -243,13 +254,22 @@ export class DebugMessageProcessor {
         this.webviewPanel.webview.postMessage({
             node: {
                 id: stackFrame.id,
-                identifier: stackFrame.identifier,
+                sequence: stackFrame.sequence,
                 name: stackFrame.name,
+                linkName: this.getLinkName(stackFrame.name),
                 parent: null,
                 type: "stackframe" // todo review stackframe
             }
         });
 
         this.idCounter++;
+    }
+
+    private getLinkName(name : string): string {
+        let linkName : string = "";
+        const names : string[] = name.split(".");
+        linkName = names[names.length - 1];
+
+        return linkName;
     }
 }

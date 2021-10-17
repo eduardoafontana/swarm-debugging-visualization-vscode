@@ -3,15 +3,11 @@ document.addEventListener('DOMContentLoaded', function(){
 		const message = event.data;
 
 		if(message.node !== undefined) {
-			if(message.node.parent === null){
-				addFirstNode(message.node);
-			}else{
-				addNode(message.node);
-			}
+			addNode(message.node);
 		}
 
 		if(message.edge !== undefined) {
-			// addEdge(message.edge);
+			addLink(message.edge);
 		}
 
 		if(message.clear !== undefined) {
@@ -22,16 +18,9 @@ document.addEventListener('DOMContentLoaded', function(){
 	function clearGraph(){
 		nodes = [];
 		links = [];
-		nodesById = null;
+
+		updateGraphData();
 	}
-
-	document.getElementById("addMethodButton").addEventListener("click", function(){
-		// addNode( "method");
-	});
-
-	document.getElementById("addStackFrameButton").addEventListener("click", function(){
-		// addNode("stackframe");
-	});
 
 	document.getElementById("nodeSymbolRadio").addEventListener("change", function(){
 		changeNodePresentationMode("symbol");
@@ -105,19 +94,19 @@ document.addEventListener('DOMContentLoaded', function(){
 		}
 	}
 
-	const getColor = node => !node.childLinks.length ? 'green' : node.collapsed ? 'red' : 'yellow';
+	const getColor = node => !node.childLinks.length ? 'green' : node.collapsed ? 'red' : 'blue';
 
 	function nodePaint(node, color, ctx) {
 		ctx.fillStyle = color;
 
-		if(node.nodeType == 'method'){
+		if(node.nodeType === 'method'){
 			ctx.beginPath(); 
 			ctx.arc(node.x, node.y, 4, 0, 2 * Math.PI, false);
 			ctx.fill();
 		}
 			
 		
-		if(node.nodeType == 'stackframe'){
+		if(node.nodeType === 'stackframe'){
 			ctx.beginPath(); 
 			ctx.moveTo(node.x, node.y - 4);
 			ctx.lineTo(node.x - 4, node.y + 4);
@@ -183,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				const end = link.target;
 
 				// ignore unbound links
-				if (typeof start !== 'object' || typeof end !== 'object') return;
+				if (typeof start !== 'object' || typeof end !== 'object') { return; }
 
 				// calculate label positioning
 				const textPos = Object.assign(...['x', 'y'].map(c => ({
@@ -247,38 +236,67 @@ document.addEventListener('DOMContentLoaded', function(){
 			.linkDirectionalParticleWidth(3);
 	}
 
-	function addFirstNode(originalNode){
-		let node = { id: originalNode.id, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type };
-		nodes.push(node);
+	function addLink(originalLink){
+		let link = {source: originalLink.source, target: originalLink.target, name: originalLink.sequence }; //+ ':' + originalLink.linkName}; //todo review link name
+		links.push(link);
 
-		nodesById = Object.fromEntries(nodes.map(node => [node.id, node]));
+		nodes.find(element => element.id === originalLink.source).collapsed = false;
+		nodes.find(element => element.id === originalLink.target).collapsed = false;
+
+		nodes.forEach(node => {
+			node.childLinks = [];
+		});
+
+		links.forEach(link => {
+			if((typeof link.source) === 'object'){
+				nodes.find(element => element.id === link.source.id).childLinks.push(link);
+			}else{
+				nodes.find(element => element.id === link.source).childLinks.push(link);
+			}
+		});
+
+		updateGraphData();
+	}
+
+	function addFirstNode(originalNode){
+		let node = { id: originalNode.id, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type, root: true };
+		nodes.push(node);
 
 		updateGraphData();
 	}
 
 	function addNode(originalNode){
+		if(nodes.length === 0) { 
+			addFirstNode(originalNode); return; 
+		}
+
+		if(originalNode.parent === null) {
+			addFirstNode(originalNode); return; 
+		}
+
+		console.log(originalNode);
+
 		let nodeFatherId = originalNode.parent.id;
 		
 		nodes[nodeFatherId].collapsed = false;
 
 		let nodeId = originalNode.id;
-		let node = { id: nodeId, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type };
+		let node = { id: nodeId, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type, root: false };
 		nodes.push(node);
 
-		let link = {source: nodeFatherId, target: nodeId, name: nodeId + ':ll'};
+		let link = {source: nodeFatherId, target: nodeId, name: originalNode.sequence }; //+ ':' + originalNode.linkName}; // todo review link name
 		links.push(link);
 
 		nodes.forEach(node => {
 			node.childLinks = [];
 		});
 
-		nodesById = Object.fromEntries(nodes.map(node => [node.id, node]));
-
 		links.forEach(link => {
-			if((typeof link.source) === 'object') 
-				nodesById[link.source.id].childLinks.push(link);
-			else
-				nodesById[link.source].childLinks.push(link); 
+			if((typeof link.source) === 'object'){
+				nodes.find(element => element.id === link.source.id).childLinks.push(link);
+			}else{
+				nodes.find(element => element.id === link.source).childLinks.push(link);
+			}
 		});
 
 		updateGraphData();
@@ -292,16 +310,24 @@ document.addEventListener('DOMContentLoaded', function(){
 		const visibleNodes = [];
 		const visibleLinks = [];
 
-		(function traverseTree(node = nodesById[0]) {
-			visibleNodes.push(node);
+		if (nodes.length === 0) {
+			return { nodes: visibleNodes, links: visibleLinks };
+		};
 
-			if (node.collapsed) return;
+		const rootNodes = nodes.filter(element => element.root === true);
 
-			visibleLinks.push(...node.childLinks);
-			node.childLinks
-				.map(link => ((typeof link.target) === 'object') ? link.target : nodesById[link.target]) // get child node
-				.forEach(traverseTree);
-		})(); // IIFE
+		rootNodes.forEach(rootNode => {
+			(function traverseTree(node) {
+				visibleNodes.push(node);
+
+				if (node.collapsed) { return; }
+
+				visibleLinks.push(...node.childLinks);
+				node.childLinks
+					.map(link => ((typeof link.target) === 'object') ? link.target : nodes.find(element => element.id === link.target))
+					.forEach(traverseTree);
+			})(rootNode); // IIFE
+		});
 
 		return { nodes: visibleNodes, links: visibleLinks };
 	};
@@ -310,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 	let nodes = [];
 	let links = [];
-	let nodesById = null;
 
 	const Graph = ForceGraph();
 	const elem = document.getElementById("graph");
@@ -323,11 +348,9 @@ document.addEventListener('DOMContentLoaded', function(){
 			}
 		})
 		.linkColor(link => 'white');
-	
-	addFirstNode();
+
 	showEdgeHideParticle();
 	showEdgeShowArrow();
 	showNodeAsText();
 	showEdgeShowText();
-
 });
