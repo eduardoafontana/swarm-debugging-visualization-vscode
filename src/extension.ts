@@ -91,7 +91,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 		</head>
 		<body>
 
-			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px;">
+			<div class="control-button">
 				Node:
 				<input type="radio" id="nodeSymbolRadio" name="nodePresentationMode" value="Symbol">
 				<label for="nodeSymbolRadio">Symbol</label>
@@ -99,7 +99,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 				<label for="nodeTextRadio">Text</label>
 			</div>
 
-			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+			<div class="control-button">
 				Edge text:
 				<input type="radio" id="edgeTextShowRadio" name="edgePresentationMode" value="Show" checked="true">
 				<label for="edgeTextShowRadio">Show</label>
@@ -107,7 +107,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 				<label for="edgeTextHideRadio">Hide</label>
 			</div>
 
-			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+			<div class="control-button">
 				Show arrow:
 				<input type="radio" id="edgeArrowShowRadio" name="edgeArrowMode" value="Show" checked="true">
 				<label for="edgeArrowShowRadio">Show</label>
@@ -115,7 +115,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 				<label for="edgeArrowHideRadio">Hide</label>
 			</div>
 
-			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
+			<div class="control-button">
 				Show particles:
 				<input type="radio" id="edgeParticleShowRadio" name="edgeParticleMode" value="Show">
 				<label for="edgeParticleShowRadio">Show</label>
