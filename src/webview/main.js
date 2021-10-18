@@ -117,15 +117,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
 	function showNodeAsSymbol(){
 		graph
-			// .nodeAutoColorBy('group')
-			// .nodePointerAreaPaint(null);
 			.nodeCanvasObject((node, ctx) => nodePaint(node, getColor(node), ctx))
 			.nodePointerAreaPaint(nodePaint);
 	}
 
 	function showNodeAsText(){
 		graph
-			// .nodeAutoColorBy('group')
 			.nodeCanvasObject((node, ctx) => {
 				node.color = getColor(node);
 
@@ -133,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				const fontSize = 5;
 				ctx.font = `${fontSize}px Sans-Serif`;
 				const textWidth = ctx.measureText(label).width;
-				const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+				const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
 
 				ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
 				ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
@@ -146,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function(){
 				// let el = document.getElementById("graph");
 				// el.style.cursor = null;//node && node.childLinks.length ? 'pointer' : null;
 
-				node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+				node.__bckgDimensions = bckgDimensions;
 			})
 			.nodePointerAreaPaint((node, color, ctx) => {
 				ctx.fillStyle = color;
@@ -241,12 +238,9 @@ document.addEventListener('DOMContentLoaded', function(){
 			.linkDirectionalParticleWidth(3);
 	}
 
-	function addLink(originalLink){
+	function createLinkAndRelink(originalLink){
 		let link = {source: originalLink.source, target: originalLink.target, name: originalLink.sequence }; //+ ':' + originalLink.linkName}; //todo review link name
 		links.push(link);
-
-		nodes.find(element => element.id === originalLink.source).collapsed = false;
-		nodes.find(element => element.id === originalLink.target).collapsed = false;
 
 		nodes.forEach(node => {
 			node.childLinks = [];
@@ -259,13 +253,26 @@ document.addEventListener('DOMContentLoaded', function(){
 				nodes.find(element => element.id === link.source).childLinks.push(link);
 			}
 		});
+	}
+
+	function addLink(originalLink){
+		createLinkAndRelink(originalLink);
+
+		nodes.find(element => element.id === originalLink.source).collapsed = false;
+		nodes.find(element => element.id === originalLink.target).collapsed = false;
 
 		updateGraphData();
 	}
 
 	function addFirstNode(originalNode){
-		let node = { id: originalNode.id, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type, root: true };
-		nodes.push(node);
+		nodes.push({ 
+			id: originalNode.id,
+			name: originalNode.name,
+			collapsed: true,
+			childLinks: [],
+			nodeType: originalNode.type,
+			root: true
+		});
 
 		updateGraphData();
 	}
@@ -285,24 +292,16 @@ document.addEventListener('DOMContentLoaded', function(){
 		
 		nodes[nodeFatherId].collapsed = false;
 
-		let nodeId = originalNode.id;
-		let node = { id: nodeId, name: originalNode.name, collapsed: true, childLinks: [], nodeType: originalNode.type, root: false };
-		nodes.push(node);
-
-		let link = {source: nodeFatherId, target: nodeId, name: originalNode.sequence }; //+ ':' + originalNode.linkName}; // todo review link name
-		links.push(link);
-
-		nodes.forEach(node => {
-			node.childLinks = [];
+		nodes.push({ 
+			id: originalNode.id,
+			name: originalNode.name,
+			collapsed: true,
+			childLinks: [],
+			nodeType: originalNode.type,
+			root: false
 		});
 
-		links.forEach(link => {
-			if((typeof link.source) === 'object'){
-				nodes.find(element => element.id === link.source.id).childLinks.push(link);
-			}else{
-				nodes.find(element => element.id === link.source).childLinks.push(link);
-			}
-		});
+		createLinkAndRelink({source: nodeFatherId, target: originalNode.id, sequence: originalNode.sequence });
 
 		updateGraphData();
 	}
