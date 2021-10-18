@@ -38,9 +38,6 @@ export class DebugMessageProcessor {
 
         // todo: search for well structured object variables, on click get response or doing request
 
-        // todo: o identifier passa a ser uma feature descontinuada (não passa valor para a visualização) que
-        // servirá de base para a próxima feature de numeração da sequência da mensagens nas edges
-
         message.body.variables.forEach((element: any) => {
             if(this.currentStackFrame === null) { return; }
 
@@ -94,19 +91,19 @@ export class DebugMessageProcessor {
 
                 // console.log(variableResponse);
 
-                //a partir do current stackframe, pesquisar qual é o stackframe cujo o previous tem a mesma linha e source do current
+                // a partir do current stackframe, pesquisar qual é o stackframe cujo o previous tem a mesma linha e source do current
 
-                //---------------
-                //verificar se existe a necessidade de atualizar uma edge de um nodo, significa atualizar o parent de um frame e postar o update da node/edge
+                // ---------------
+                // verificar se existe a necessidade de atualizar uma edge de um nodo,
+                // significa atualizar o parent de um frame e postar o update da node/edge
 
-                //se sabe do previous o numero da linha e a source name
-                //quando cria a variável
+                // se sabe do previous o numero da linha e a source name
+                // quando cria a variável
 
-                //buscar a variável que bate com o previous
+                // buscar a variável que bate com o previous
             }
         });
 
-        // ---====
         let stackFrameWaitingLink: StackFrame | undefined = this.stackFramesWaitingLink.find(o =>
             o.previousStackFrame.name === this.currentStackFrame?.name
             && o.previousStackFrame.sourceName === this.currentStackFrame.sourceName
@@ -156,7 +153,8 @@ export class DebugMessageProcessor {
                 // this.webviewPanel.webview.postMessage(
                 //     { edge: { source: variable.identifier, target: stackFramesWaitingLink.identifier } }
                 // );
-            // se não existe, vincular o current stackFrame com o stackFramesWaitingLink e fazer o post. Para isso criar a variável _stackFrameLinked dentro do StackFrame
+            // se não existe, vincular o current stackFrame com o stackFramesWaitingLink e fazer o post.
+            // para isso criar a variável _stackFrameLinked dentro do StackFrame
 
             const foundIndex: number = this.stackFramesWaitingLink.indexOf(stackFrameWaitingLink);
             if (foundIndex > -1) {

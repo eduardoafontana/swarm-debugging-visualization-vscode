@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	}
 
 	function showNodeAsSymbol(){
-		Graph
+		graph
 			// .nodeAutoColorBy('group')
 			// .nodePointerAreaPaint(null);
 			.nodeCanvasObject((node, ctx) => nodePaint(node, getColor(node), ctx))
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	}
 
 	function showNodeAsText(){
-		Graph
+		graph
 			// .nodeAutoColorBy('group')
 			.nodeCanvasObject((node, ctx) => {
 				node.color = getColor(node);
@@ -156,17 +156,17 @@ document.addEventListener('DOMContentLoaded', function(){
 	}
 
 	function showEdgeHideText(){
-		Graph
+		graph
 			.linkCanvasObjectMode(null)
 			.linkCanvasObject(null);
 	}
 
 	function showEdgeShowText(){
-		Graph
+		graph
 			.linkCanvasObjectMode(() => 'after')
 			.linkCanvasObject((link, ctx) => {
 				const MAX_FONT_SIZE = 4;
-				const LABEL_NODE_MARGIN = Graph.nodeRelSize() * 1.5;
+				const LABEL_NODE_MARGIN = graph.nodeRelSize() * 1.5;
 
 				const start = link.source;
 				const end = link.target;
@@ -185,8 +185,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
 				let textAngle = Math.atan2(relLink.y, relLink.x);
 				// maintain label vertical orientation for legibility
-				if (textAngle > Math.PI / 2) textAngle = -(Math.PI - textAngle);
-				if (textAngle < -Math.PI / 2) textAngle = -(-Math.PI - textAngle);
+				if (textAngle > Math.PI / 2){ 
+					textAngle = -(Math.PI - textAngle);
+				}
+
+				if (textAngle < -Math.PI / 2){ 
+					textAngle = -(-Math.PI - textAngle);
+				}
 
 				//const label = `${link.source.id} > ${link.target.id}`;
 				const label = `${link.name}`;
@@ -215,23 +220,23 @@ document.addEventListener('DOMContentLoaded', function(){
 	}
 
 	function showEdgeHideArrow(){
-		Graph
+		graph
 			.linkDirectionalArrowLength(0);
 	}
 
 	function showEdgeShowArrow(){
-		Graph
+		graph
 			.linkDirectionalArrowLength(6)
 			.linkDirectionalArrowRelPos(2);
 	}
 
 	function showEdgeHideParticle(){
-		Graph
+		graph
 			.linkDirectionalParticles(0);
 	}
 
 	function showEdgeShowParticle(){
-		Graph
+		graph
 			.linkDirectionalParticles(1)
 			.linkDirectionalParticleWidth(3);
 	}
@@ -303,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	}
 
 	const updateGraphData = () => {
-		Graph.graphData(getPrunedTree());
+		graph.graphData(getPrunedTree());
 	};
 
 	const getPrunedTree = () => {
@@ -337,9 +342,9 @@ document.addEventListener('DOMContentLoaded', function(){
 	let nodes = [];
 	let links = [];
 
-	const Graph = ForceGraph();
+	const graph = ForceGraph();
 	const elem = document.getElementById("graph");
-	Graph(elem)
+	graph(elem)
 		//.onNodeHover(node => elem.style.cursor = node && node.childLinks.length ? 'pointer' : null)
 		.onNodeClick(node => {
 			if (node.childLinks.length) {

@@ -2,19 +2,21 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { DebugMessageProcessor } from "./DebugMessageProcessor";
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
 
-	const panel = vscode.window.createWebviewPanel("swarmWebview", "Swarm Visualization", vscode.ViewColumn.Two, { enableScripts: true });
+	const panel: vscode.WebviewPanel = vscode.window.createWebviewPanel(
+		"swarmWebview", "Swarm Visualization", vscode.ViewColumn.Two, { enableScripts: true }
+	);
 
-    const scriptStyle = panel.webview.asWebviewUri(vscode.Uri.file(
+    const scriptStyle: vscode.Uri = panel.webview.asWebviewUri(vscode.Uri.file(
 		path.join(context.extensionPath, "src", "webview", "style.css")
 	));
 
-    const scriptMain = panel.webview.asWebviewUri(vscode.Uri.file(
+    const scriptMain: vscode.Uri = panel.webview.asWebviewUri(vscode.Uri.file(
 		path.join(context.extensionPath, "src", "webview", "main.js")
 	));
 
-    const scriptForceGraph = panel.webview.asWebviewUri(vscode.Uri.file(
+    const scriptForceGraph: vscode.Uri = panel.webview.asWebviewUri(vscode.Uri.file(
 		path.join(context.extensionPath, "src", "webview", "force-graph", "force-graph.min.js")
 	));
 
@@ -63,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 			// console.log(session);
 			return {
 				onDidSendMessage: async msg => {
-					console.log(msg);
+					// console.log(msg);
 
 					debugMessageProcessor.identifyStackFrame(msg);
 					debugMessageProcessor.identifyVariables(msg, session);
@@ -73,9 +75,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 }
 
-export function deactivate() {}
+export function deactivate(): void { return; }
 
-function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scriptForceGraph: vscode.Uri) {
+function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scriptForceGraph: vscode.Uri): string {
 	return `<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -90,7 +92,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 		<body>
 
 			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px;">
-				Node: 
+				Node:
 				<input type="radio" id="nodeSymbolRadio" name="nodePresentationMode" value="Symbol">
 				<label for="nodeSymbolRadio">Symbol</label>
 				<input type="radio" id="nodeTextRadio" name="nodePresentationMode" value="Text" checked="true">
@@ -98,7 +100,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 			</div>
 
 			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
-				Edge text: 
+				Edge text:
 				<input type="radio" id="edgeTextShowRadio" name="edgePresentationMode" value="Show" checked="true">
 				<label for="edgeTextShowRadio">Show</label>
 				<input type="radio" id="edgeTextHideRadio" name="edgePresentationMode" value="Hide">
@@ -106,7 +108,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 			</div>
 
 			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
-				Show arrow: 
+				Show arrow:
 				<input type="radio" id="edgeArrowShowRadio" name="edgeArrowMode" value="Show" checked="true">
 				<label for="edgeArrowShowRadio">Show</label>
 				<input type="radio" id="edgeArrowHideRadio" name="edgeArrowMode" value="Hide">
@@ -114,7 +116,7 @@ function getWebviewContent(scriptStyle: vscode.Uri, scriptMain: vscode.Uri, scri
 			</div>
 
 			<div style="border: 1px; border-style: solid; border-color: white; display: inline; padding: 2px; margin-left: 5px;">
-				Show particles: 
+				Show particles:
 				<input type="radio" id="edgeParticleShowRadio" name="edgeParticleMode" value="Show">
 				<label for="edgeParticleShowRadio">Show</label>
 				<input type="radio" id="edgeParticleHideRadio" name="edgeParticleMode" value="Hide" checked="true">
